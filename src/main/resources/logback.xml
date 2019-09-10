@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true" scan="true" scanPeriod="30 seconds"> 
+
+	<property name="LOG_HOME" value="C:/Users/harvey20072000/Desktop/SideProjects/ShiftArrangementSystem/logs" />
+	
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender"> 
+    <encoder>
+        <charset>UTF-8</charset>
+        <Pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n</Pattern>
+    </encoder>
+  </appender>
+  
+  <!-- 按日期区分的滚动日志 -->
+  <appender name="FILE_LOG"
+	class="ch.qos.logback.core.rolling.RollingFileAppender">
+	<file>${LOG_HOME}/shift_arrangement_system.log</file>
+	<encoder>
+        <charset>UTF-8</charset>
+        <pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
+	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+		<fileNamePattern>sas.%d{yyyy-MM-dd}.log.zip</fileNamePattern>
+		<maxHistory>30</maxHistory>
+	</rollingPolicy>
+  </appender>
+  
+  <appender name="ERROR_LOG"
+	class="ch.qos.logback.core.rolling.RollingFileAppender">
+	<file>${LOG_HOME}/shift_arrangement_system_error.log</file>
+	<encoder>
+        <charset>UTF-8</charset>
+        <pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">   
+      <level>ERROR</level>
+    </filter>
+	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+		<fileNamePattern>sas_error.%d{yyyy-MM-dd}.log.zip</fileNamePattern>
+		<maxHistory>30</maxHistory>
+	</rollingPolicy>
+  </appender>
+  
+  <appender name="EMAIL" class="ch.qos.logback.classic.net.SMTPAppender">
+  		<username>harvey20072000@gmail.com</username>
+		<password>tlwbbpuspiwezudw</password>
+  		<STARTTLS>false</STARTTLS>
+        <SSL>true</SSL>
+        <smtpHost>smtp.gmail.com</smtpHost>
+        <smtpPort>465</smtpPort> <!-- 587 -->
+
+		<to> harvey20072000@gmail.com</to>
+		<from> harvey20072000@gmail.com</from>
+		<subject>[%-5level] ShiftArrangement System mail (local)</subject>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+        	<pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n%n</pattern>
+		</layout>
+		
+		<!-- 
+		<cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">
+	        <bufferSize>8</bufferSize>
+	        <maxNumberOfBuffers>512</maxNumberOfBuffers>
+	    </cyclicBufferTracker>
+	     -->
+	    <asynchronousSending>true</asynchronousSending>
+	    <evaluator class="tw.ga.workshop.model.MyErrorEvaluator">
+	      <!-- <marker>PROCESS_INT</marker> -->
+	    </evaluator>
+  </appender>
+     
+  <logger name="tw.ga.workshop">
+  	<appender-ref ref="STDOUT" />
+    <appender-ref ref="FILE_LOG" />
+    <!-- <appender-ref ref="EMAIL" /> -->
+  </logger>
+  
+  <root level="error">
+  	<appender-ref ref="STDOUT" />
+    <appender-ref ref="ERROR_LOG" />
+    <!-- <appender-ref ref="EMAIL" /> -->
+  </root>
+</configuration>

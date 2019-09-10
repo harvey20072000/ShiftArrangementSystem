@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+       xsi:schemaLocation=  
+               "http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo.xsd
+                http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+	<!-- 
+    <mongo:mongo-client id="mongo" host="${mongo.host}" port="${mongo.port}" credentials="${mongo.username}:${mongo.password}@${mongo.dbname}">
+	    <mongo:client-options write-concern="NORMAL" />
+	</mongo:mongo-client>
+	
+	<bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+	    <constructor-arg name="mongo" ref="mongo"/>
+	    <constructor-arg name="databaseName" value="${mongo.dbname}"/>
+	</bean>
+	 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+        destroy-method="close">
+        <property name="driverClassName" value="${database.driverClassName}" />
+        <property name="url" value="${database.url}" />
+        <property name="username" value="${database.username}" />
+        <property name="password" value="${database.password}" />
+        <property name="testOnBorrow" value="true" />
+        <property name="testOnReturn" value="true" />
+        <property name="testWhileIdle" value="true" />
+        <property name="timeBetweenEvictionRunsMillis" value="300000" />
+        <property name="numTestsPerEvictionRun" value="3" />
+        <property name="minEvictableIdleTimeMillis" value="300000" />
+        <property name="defaultAutoCommit" value="false" />
+        <property name="validationQuery" value="SELECT 1" />
+    </bean>
+    
+    <bean id="sessionFactory"
+        class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!-- <jee:jndi-lookup id="dataSource" jndi-name="jdbc/dataSource"></jee:jndi-lookup> -->
+
+	<!-- 
+    <jdbc:initialize-database data-source="dataSource" ignore-failures="ALL">
+        <jdbc:script location="classpath:/database/db-dataload.sql" encoding="UTF-8" />
+    </jdbc:initialize-database>
+	 -->
+	 
+    <jpa:repositories 
+    	base-package="tw.com.geosat.dc" 
+    	entity-manager-factory-ref="entityManagerFactory" 
+    	transaction-manager-ref="txManager" />
+
+    <bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+	<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+	
+    <bean id="txManager"
+   		class="org.springframework.orm.jpa.JpaTransactionManager" >
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+        <property name="jpaDialect" ref="jpaDialect" />
+    </bean>
+
+	<bean id="jpaDialect"
+        class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+    
+    <bean id="jpaVendorAdapter"
+        class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" >
+        <property name="showSql" value="true" />
+        <property name="generateDdl" value="true" />                            
+        <property name="databasePlatform" value="tw.com.geosat.smartCloud.model.JSONPostgreSQLDialect" /><!-- org.hibernate.dialect.PostgreSQLDialect -->
+<!--         <property name="database" value="${database}" /> -->
+    </bean>
+
+    <bean id="entityManagerFactory"
+        class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" >
+        <property name="packagesToScan" value="tw.com.geosat" />
+        <property name="dataSource" ref="dataSource" />
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+        <property name="jpaPropertyMap">
+            <util:map>
+                <entry key="hibernate.hbm2ddl.auto" value="update" />
+                <entry key="hibernate.default_schema" value="${database.schema}"/>
+	            <entry key="hibernate.cache.use_second_level_cache" value="false" />
+	            <entry key="hibernate.cache.use_query_cache" value="false" />
+	            <entry key="hibernate.cache.region.factory_class" value="org.hibernate.cache.ehcache.EhCacheRegionFactory" />
+	            <!-- <entry key="net.sf.ehcache.configurationResourceName" value="/META-INF/spring/ehcache_setting.xml" /> -->
+	            <entry key="hibernate.show_sql" value="false" />
+	            <entry key="hibernate.format_sql" value="false" />
+	            <entry key="hibernate.dialect" value="${database.hibernate.dialect}" />
+	            <entry key="javax.persistence.validation.mode" value="none" />
+	            <entry key="hibernate.connection.characterEncoding" value="utf8" />
+            </util:map>
+        </property>
+    </bean>
+
+</beans>
